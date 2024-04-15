@@ -29,13 +29,15 @@ public class Client extends javax.swing.JFrame {
     private int port;
     private String name;
     private DefaultListModel model;
+    private DefaultListModel model2;
+
     private InetAddress group;
     private MulticastSocket socket;
 
     /**
      * Creates new form Client
      */
-    public Client(String address, int port, String name) throws UnknownHostException, IOException {
+    public Client(String address, int port, String name) throws UnknownHostException, IOException{
         initComponents();
         model = new DefaultListModel();
         lsChat.setModel(model);
@@ -52,10 +54,16 @@ public class Client extends javax.swing.JFrame {
             public void run() {
                 while(true){
                     receiveMessage();
+                    try {
+                        getUser();
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         });
         t.start();   
+        
     }
     
     private void receiveMessage(){
@@ -95,6 +103,8 @@ public class Client extends javax.swing.JFrame {
         jButtonSend = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         lsChat = new javax.swing.JList<>();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        lsUsers = new javax.swing.JList<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -117,6 +127,13 @@ public class Client extends javax.swing.JFrame {
         });
         jScrollPane2.setViewportView(lsChat);
 
+        lsUsers.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane1.setViewportView(lsUsers);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -124,11 +141,13 @@ public class Client extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jScrollPane2)
-                        .addContainerGap())
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(txtMessage, javax.swing.GroupLayout.DEFAULT_SIZE, 270, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(txtMessage, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addComponent(jButtonSend)
                         .addGap(20, 20, 20))))
@@ -137,7 +156,9 @@ public class Client extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtMessage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -160,6 +181,16 @@ public class Client extends javax.swing.JFrame {
         txtMessage.setText("");
     }//GEN-LAST:event_jButtonSendActionPerformed
 
+    private void getUser() throws SQLException{
+        model2 = new DefaultListModel();
+        sqlite db = new sqlite();
+        String users = db.getUsers(address, port);
+        String[] listUsers = users.split(",");
+        for(String x : listUsers){
+            model2.addElement(x);
+        }
+        lsUsers.setModel(model2);
+    }
         //cập nhật username
     private void deleteUsers() throws SQLException{
         sqlite db = new sqlite();
@@ -175,8 +206,8 @@ public class Client extends javax.swing.JFrame {
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         try {
             // TODO add your handling code here:
-            sendMessage(name+" đã thoát phòng chat");
             deleteUsers();
+            sendMessage(name+" đã thoát phòng chat");
         } catch (SQLException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -219,8 +250,10 @@ public class Client extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonSend;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JList<String> lsChat;
+    private javax.swing.JList<String> lsUsers;
     private javax.swing.JTextField txtMessage;
     // End of variables declaration//GEN-END:variables
 }

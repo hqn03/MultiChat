@@ -20,8 +20,11 @@ import java.util.ArrayList;
  */
 public class sqlite {
     private Connection connect(){
-        String url = "jdbc:sqlite:C:\\Users\\Nhat\\Documents\\NetBeansProjects\\LapTrinhMang\\src\\MulticastSocket_MultiChat\\data.db";
+//        String url = "jdbc:sqlite:C:\\Users\\Nhat\\Documents\\NetBeansProjects\\MultiChat\\src\\multichat\\data.db";
+        String url = "jdbc:sqlite:.\\src\\multichat\\data.db";
+
         Connection conn = null;
+        
         try {
             conn = DriverManager.getConnection(url);
         } catch (SQLException e) {
