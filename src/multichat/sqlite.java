@@ -21,17 +21,18 @@ import java.util.ArrayList;
 public class sqlite {
     private Connection connect(){
 //        String url = "jdbc:sqlite:C:\\Users\\Nhat\\Documents\\NetBeansProjects\\MultiChat\\src\\multichat\\data.db";
+        //String kết nối database
         String url = "jdbc:sqlite:.\\src\\multichat\\data.db";
-
         Connection conn = null;
-        
         try {
+            //Lấy connection từ chuỗi kết nối
             conn = DriverManager.getConnection(url);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         return conn;
     }
+    //tạo 1 room mới
     public void insert(String address,int port,String users){
         String sql = "INSERT INTO Rooms(address,port,users) VALUES(?,?,?)";
         try(Connection conn = this.connect();
@@ -45,6 +46,7 @@ public class sqlite {
             System.out.print(e.getMessage()+"1");
         }
     }
+    //lấy list phòng
     public List<RoomChat> selectAll(){
         try {
             List<RoomChat> list = new ArrayList<RoomChat>();
@@ -64,6 +66,7 @@ public class sqlite {
             return null;
         }
     }
+    //cập nhật column user
     public void updateUsers(String address,int port,String users) throws SQLException{
         String sql = "UPDATE rooms SET users=? WHERE address=? and port=?";
             Connection conn = connect();
@@ -76,6 +79,7 @@ public class sqlite {
             conn.close();
     }
     
+    //get chuỗi users
     public String getUsers(String address, int port) throws SQLException{
         String sql = "SELECT id, address, port, users FROM Rooms WHERE address=? and port=?";
         Connection conn = this.connect();

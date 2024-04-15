@@ -28,8 +28,8 @@ public class Client extends javax.swing.JFrame {
     private String address;
     private int port;
     private String name;
-    private DefaultListModel model;
-    private DefaultListModel model2;
+    private DefaultListModel model; //cho lsChat
+    private DefaultListModel model2; //cho lsUsers
 
     private InetAddress group;
     private MulticastSocket socket;
@@ -49,6 +49,7 @@ public class Client extends javax.swing.JFrame {
         
         if (socket!=null)
             sendMessage(name+" đã vào phòng chat");
+        //tạo luồng
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -65,7 +66,7 @@ public class Client extends javax.swing.JFrame {
         t.start();   
         
     }
-    
+    //nhận tin nhắn
     private void receiveMessage(){
         byte[] buffer = new byte[1024];
         DatagramPacket datagram = new DatagramPacket(buffer,buffer.length,group,port);
@@ -80,6 +81,7 @@ public class Client extends javax.swing.JFrame {
             System.out.println("Socket closed!");
         }
     }
+    //gửi tin nhắn
     private void sendMessage(String message){
         byte[] buffer = message.getBytes();
         DatagramPacket datagram = new DatagramPacket(buffer,buffer.length,group,port);
@@ -169,11 +171,14 @@ public class Client extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    //Vào phòng 
     private void joinRoom(String address, int port) throws UnknownHostException, IOException{
         group = InetAddress.getByName(address);
         socket = new MulticastSocket(port);
         socket.joinGroup(group);
     }
+    
+    //nhập tin nhắn
     private void jButtonSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSendActionPerformed
         // TODO add your handling code here:
         String message = name + ": " + txtMessage.getText();
@@ -181,24 +186,30 @@ public class Client extends javax.swing.JFrame {
         txtMessage.setText("");
     }//GEN-LAST:event_jButtonSendActionPerformed
 
+    //get list users đưa vào lsUsers
     private void getUser() throws SQLException{
         model2 = new DefaultListModel();
         sqlite db = new sqlite();
         String users = db.getUsers(address, port);
+        
+        //Cắt chuỗi theo dấu "," chuyển về mảng
         String[] listUsers = users.split(",");
         for(String x : listUsers){
             model2.addElement(x);
         }
         lsUsers.setModel(model2);
     }
-        //cập nhật username
+    
+    //xóa tên user khỏi string users trong table
     private void deleteUsers() throws SQLException{
         sqlite db = new sqlite();
         StringBuilder stringBuilder = new StringBuilder(db.getUsers(address, port));
         String strDel = name+",";
+        //tìm kiếm vị trí đầu tiên xuất hiện tên trong chuỗi, nếu không có return -1
         int i = stringBuilder.indexOf(strDel);
         if(i!=-1)
         {
+            //xóa tên trong chuỗi( vị trí bắt đầu xóa, độ dài muốn xóa)
             stringBuilder.delete(i, i+strDel.length());
         }
         db.updateUsers(address, port, stringBuilder.toString());

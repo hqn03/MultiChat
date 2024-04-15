@@ -43,7 +43,9 @@ public class NewJFrame extends javax.swing.JFrame {
         Runnable helloRunnable = new Runnable() { public void run() {
         loadData();
     }};
+        //Tạo 1 lịch gồm 1 luồng
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        //Chạy task helloRunable , delay ban đầu =0, delay mỗi lần tiếp theo=3, đơn vị = giây; 
         executor.scheduleAtFixedRate(helloRunnable, 0, 3, TimeUnit.SECONDS);
                 
     }
@@ -120,12 +122,16 @@ public class NewJFrame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    //lấy data từ database đưa vào tableModel
     private void loadData(){
+        //khởi tạo model
         model = new DefaultTableModel();
+        //thêm cột
         model.addColumn("STT");
         model.addColumn("Address");
         model.addColumn("Port");
         model.addColumn("Users");
+        
         jTable1.setModel(model);
         sqlite db = new sqlite();
         for(RoomChat x : db.selectAll())
@@ -146,13 +152,6 @@ public class NewJFrame extends javax.swing.JFrame {
         return false;
     }
     
-//    private String getCurrentUsers(String address, int port){
-//        for(int i=0; i< model.getRowCount();i++)
-//            if(model.getValueAt(i, 1).equals(address)&&model.getValueAt(i, 2).equals(port))
-//                return model.getValueAt(i, 3).toString();
-//        return null;
-//    }
-
     //cập nhật username
     private void updateUsers(String address, int port,String users) throws SQLException{
         sqlite db = new sqlite();
@@ -172,6 +171,7 @@ public class NewJFrame extends javax.swing.JFrame {
     }
     
     private void moveToChat() throws IOException{
+        //mở frame client 
         Client client = new Client(address,port,name);
         client.show();
                 
@@ -203,7 +203,7 @@ public class NewJFrame extends javax.swing.JFrame {
                 }
             }
             else{
-                insertRoom(address, port,name+", ");
+                insertRoom(address, port,name+",");
                 try {
                     moveToChat();
                 } catch (IOException ex) {
